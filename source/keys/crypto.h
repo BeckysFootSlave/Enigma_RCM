@@ -115,7 +115,7 @@ static const u8 secure_data_tweaks[1][0x10] __attribute__((aligned(4))) = {
  //!TODO: Update on keygen changes.
 #define TSEC_ROOT_KEY_VERSION 2
 
-// Lockpick_RCM keyslots
+// Picklock_RCM keyslots
 #define KS_BIS_00_CRYPT 0
 #define KS_BIS_00_TWEAK 1
 #define KS_BIS_01_CRYPT 2

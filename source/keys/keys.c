@@ -740,7 +740,7 @@ static void _derive_keys() {
     }
 
     end_time = get_tmr_us();
-    gfx_printf("%kLockpick totally done in %d us\n", colors[(color_idx++) % 6], end_time - start_whole_operation_time);
+    gfx_printf("%Picklock totally done in %d us\n", colors[(color_idx++) % 6], end_time - start_whole_operation_time);
 
     if (h_cfg.t210b01) {
         // On Mariko, save only relevant key set
@@ -839,7 +839,7 @@ void dump_keys() {
     if (btn == BTN_VOL_UP) {
         int res = save_fb_to_bmp();
         if (!res) {
-            gfx_printf("%kScreenshot sd:/switch/lockpick_rcm.bmp saved.", colors[(color_idx++) % 6]);
+            gfx_printf("%kScreenshot sd:/switch/picklock_rcm.bmp saved.", colors[(color_idx++) % 6]);
         } else {
             EPRINTF("Screenshot failed.");
         }
