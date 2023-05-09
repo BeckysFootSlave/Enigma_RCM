@@ -145,11 +145,11 @@ bool sd_mount()
 	if (res)
 	{
 		gfx_con.mute = false;
-		EPRINTF("Failed to init SD card.");
+		EPRINTF("SD-Karte konnte nicht initialisiert werden.");
 		if (!sdmmc_get_sd_inserted())
-			EPRINTF("Make sure that it is inserted.");
+			EPRINTF("Vergewissere dich, dass sie eingesetzt ist.");
 		else
-			EPRINTF("SD Card Reader is not properly seated!");
+			EPRINTF("Der SD-Kartenleser sitzt nicht richtig!");
 	}
 	else
 	{
@@ -162,7 +162,7 @@ bool sd_mount()
 		else
 		{
 			gfx_con.mute = false;
-			EPRINTFARGS("Failed to mount SD card (FatFS Error %d).\nMake sure that a FAT partition exists..", res);
+			EPRINTFARGS("SD-Karte konnte nicht eingelesen werden (FatFS-Fehler %d).\nStelle sicher, dass eine FAT-Partition vorhanden ist...", res);
 		}
 	}
 
@@ -222,7 +222,7 @@ int sd_save_to_file(void *buf, u32 size, const char *filename)
 	res = f_open(&fp, filename, FA_CREATE_ALWAYS | FA_WRITE);
 	if (res)
 	{
-		EPRINTFARGS("Error (%d) creating file\n%s.\n", res, filename);
+		EPRINTFARGS("Fehler (%d) beim erstellen der Datei\n%s.\n", res, filename);
 		return res;
 	}
 
