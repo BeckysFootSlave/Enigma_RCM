@@ -82,7 +82,7 @@ int save_fb_to_bmp()
 
 	f_mkdir("sd:/switch");
 	
-	char path[0x80] = "sd:/switch/lockpick_rcm.bmp";
+	char path[0x80] = "sd:/switch/enigma_rcm.bmp";
 
 	// Save screenshot and log.
 	int res = sd_save_to_file(bitmap, file_size, path);
