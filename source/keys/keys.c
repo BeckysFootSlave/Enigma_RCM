@@ -732,15 +732,15 @@ static void _derive_keys() {
 
     // Requires BIS key for SYSTEM partition
     if (!emmc_storage.initialized) {
-        EPRINTF("eMMC not initialized.\nSkipping SD seed and titlekeys.");
+        EPRINTF("eMMC nicht initialisiert.\nSkipping SD seed and titlekeys.");
     } else if (key_exists(keys->bis_key[2])) {
         _derive_emmc_keys(keys, titlekey_buffer, is_dev);
     } else {
-        EPRINTF("Missing needed BIS keys.\nSkipping SD seed and titlekeys.");
+        EPRINTF("Benoetigte BIS keys fehlen.\nSkipping SD seed and titlekeys.");
     }
 
     end_time = get_tmr_us();
-    gfx_printf("%kLockpick totally done in %d us\n", colors[(color_idx++) % 6], end_time - start_whole_operation_time);
+    gfx_printf("%kEnigma(tisiert) in %d ms\n", colors[(color_idx++) % 6], end_time - start_whole_operation_time);
 
     if (h_cfg.t210b01) {
         // On Mariko, save only relevant key set
