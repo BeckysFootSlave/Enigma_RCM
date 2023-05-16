@@ -14,7 +14,7 @@ include ./Versions.inc
 
 ################################################################################
 
-TARGET := Enigma_RCM
+TARGET := Picklock_RCM
 BUILDDIR := build
 OUTPUTDIR := output
 SOURCEDIR := source
@@ -102,7 +102,7 @@ $(OUTPUTDIR)/$(TARGET).bin: $(BUILDDIR)/$(TARGET)/$(TARGET).elf $(TOOLS)
 
 $(BUILDDIR)/$(TARGET)/$(TARGET).elf: $(OBJS)
 	@$(CC) $(LDFLAGS) -T $(SOURCEDIR)/link.ld $^ -o $@
-	@echo "Enigma_RCM was built with the following flags:\nCFLAGS:  "$(CFLAGS)"\nLDFLAGS: "$(LDFLAGS)
+	@echo "Picklock_RCM was built with the following flags:\nCFLAGS:  "$(CFLAGS)"\nLDFLAGS: "$(LDFLAGS)
 
 $(OBJS): | $(KEYGENDIR)
 
