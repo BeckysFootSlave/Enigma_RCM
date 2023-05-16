@@ -160,7 +160,7 @@ int emummc_storage_init_mmc()
 
 		if (f_stat(emu_cfg.emummc_file_based_path, &fno))
 		{
-			EPRINTF("eMMC Ordner konnte nicht geoeffnet werden.");
+			EPRINTF("Failed to open eMMC folder.");
 			goto out;
 		}
 		f_chmod(emu_cfg.emummc_file_based_path, AM_ARC, AM_ARC);
@@ -168,7 +168,7 @@ int emummc_storage_init_mmc()
 		strcat(emu_cfg.emummc_file_based_path, "/00");
 		if (f_stat(emu_cfg.emummc_file_based_path, &fno))
 		{
-			EPRINTF("emuMMC RAWNAND konnte nicht geoeffnet werden.");
+			EPRINTF("Failed to open emuMMC rawnand.");
 			goto out;
 		}
 		emu_cfg.file_based_part_size = fno.fsize >> 9;
@@ -217,13 +217,13 @@ int emummc_storage_read(u32 sector, u32 num_sectors, void *buf)
 		}
 		if (f_open(&fp, emu_cfg.emummc_file_based_path, FA_READ))
 		{
-			EPRINTF("emuMMC Image konnte nicht geoeffnet werden.");
+			EPRINTF("Failed to open emuMMC image.");
 			return 0;
 		}
 		f_lseek(&fp, (u64)sector << 9);
 		if (f_read(&fp, buf, (u64)num_sectors << 9, NULL))
 		{
-			EPRINTF("emuMMC Image konnte nicht gelesen werden.");
+			EPRINTF("Failed to read emuMMC image.");
 			f_close(&fp);
 			return 0;
 		}

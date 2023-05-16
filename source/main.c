@@ -101,7 +101,7 @@ int launch_payload(char *path, bool clear_screen)
 		if (f_open(&fp, path, FA_READ))
 		{
 			gfx_con.mute = false;
-			EPRINTFARGS("Payload Datei nicht gefunden!\n(%s)", path);
+			EPRINTFARGS("Payload file is missing!\n(%s)", path);
 
 			goto out;
 		}
@@ -121,7 +121,7 @@ int launch_payload(char *path, bool clear_screen)
 				f_close(&fp);
 
 				gfx_con.mute = false;
-				EPRINTF("Coreboot auf Mariko nicht erlaubt!");
+				EPRINTF("Coreboot not allowed on Mariko!");
 
 				goto out;
 			}
@@ -198,7 +198,7 @@ void launch_tools()
 			u32 color_idx = 0;
 
 			ments[0].type = MENT_BACK;
-			ments[0].caption = "Zurueck";
+			ments[0].caption = "Back";
 			ments[0].color = colors[(color_idx++) % 6];
 			ments[1].type = MENT_CHGLINE;
 			ments[1].color = colors[(color_idx++) % 6];
@@ -235,7 +235,7 @@ void launch_tools()
 		if (i > 0)
 		{
 			memset(&ments[i + i_off], 0, sizeof(ment_t));
-			menu_t menu = { ments, "Datei zum starten auswaehlen", 0, 0 };
+			menu_t menu = { ments, "Choose a file to launch", 0, 0 };
 
 			file_sec = (char *)tui_do_menu(&menu);
 
@@ -250,7 +250,7 @@ void launch_tools()
 			}
 		}
 		else
-			EPRINTF("Keine Payloads oder Module gefunden.");
+			EPRINTF("No payloads or modules found.");
 
 		free(ments);
 		free(filelist);
@@ -272,7 +272,7 @@ void launch_tools()
 			memcpy(dir, file_sec, strlen(file_sec) + 1);
 
 		launch_payload(dir, true);
-		EPRINTF("Fehler beim starten der Payload.");
+		EPRINTF("Failed to launch payload.");
 	}
 
 out:
@@ -314,23 +314,23 @@ void dump_mariko_partial_keys();
 ment_t ment_partials[] = {
 	MDEF_BACK(colors[0]),
 	MDEF_CHGLINE(),
-	MDEF_CAPTION("Damit werden die Ergebnisse des Schreibens von Nullen", colors[1]),
-	MDEF_CAPTION("ueber aufeinanderfolgende 32-Bit-Abschnitte jedes", colors[1]),
-	MDEF_CAPTION("Keyslots ausgegeben deren Ergebnisse dann schnell auf", colors[1]),
-	MDEF_CAPTION("einem Computer geknackt werden koennen", colors[1]),
-	MDEF_CAPTION("um Schluessel aus unlesbaren Keyslots wiederherzustellen.", colors[1]),
+	MDEF_CAPTION("This dumps the results of writing zeros", colors[1]),
+	MDEF_CAPTION("over consecutive 32-bit portions of each", colors[1]),
+	MDEF_CAPTION("keyslot, the results of which can then", colors[1]),
+	MDEF_CAPTION("be bruteforced quickly on a computer", colors[1]),
+	MDEF_CAPTION("to recover keys from unreadable keyslots.", colors[1]),
 	MDEF_CHGLINE(),
-	MDEF_CAPTION("Das beinhaltet die Mariko KEK und BEK", colors[2]),
-	MDEF_CAPTION("ebenso die einzigartige SBK.", colors[2]),
+	MDEF_CAPTION("This includes the Mariko KEK and BEK", colors[2]),
+	MDEF_CAPTION("as well as the unique SBK.", colors[2]),
 	MDEF_CHGLINE(),
-	MDEF_CAPTION("Diese sind unwichtig fuer die meisten Benutzer", colors[3]),
-	MDEF_CAPTION("aber aus Archivierungsgruenden vorhanden.", colors[3]),
+	MDEF_CAPTION("These are not useful for most users", colors[3]),
+	MDEF_CAPTION("but are included for archival purposes.", colors[3]),
 	MDEF_CHGLINE(),
-	MDEF_CAPTION("Warnung: keyslots werden geloescht!", colors[4]),
-	MDEF_CAPTION("Konsole muss komplett neugestartet werden!", colors[4]),
-	MDEF_CAPTION("Modchip muss erneut starten, um die Keys zu reparieren!", colors[4]),
+	MDEF_CAPTION("Warning: this wipes keyslots!", colors[4]),
+	MDEF_CAPTION("The console must be completely restarted!", colors[4]),
+	MDEF_CAPTION("Modchip must run again to fix the keys!", colors[4]),
 	MDEF_CAPTION("---------------", colors[5]),
-	MDEF_HANDLER("Mariko Partials auslesen", dump_mariko_partial_keys, colors[0]),
+	MDEF_HANDLER("Dump Mariko Partials", dump_mariko_partial_keys, colors[0]),
 	MDEF_END()
 };
 
@@ -342,18 +342,18 @@ power_state_t STATE_REBOOT_RCM          = REBOOT_RCM;
 power_state_t STATE_REBOOT_BYPASS_FUSES = REBOOT_BYPASS_FUSES;
 
 ment_t ment_top[] = {
-	MDEF_HANDLER("Keys vom sysNAND auslesen", dump_sysnand, colors[0]),
-	MDEF_HANDLER("Keys vom emuNAND auslesen", dump_emunand, colors[1]),
+	MDEF_HANDLER("Dump from SysNAND", dump_sysnand, colors[0]),
+	MDEF_HANDLER("Dump from EmuNAND", dump_emunand, colors[1]),
 	MDEF_CAPTION("---------------", colors[2]),
-	MDEF_HANDLER("Amiibo Keys auslesen", dump_amiibo_keys, colors[3]),
-	MDEF_MENU("Mariko PartialAES Keys auslesen (Neustart erforderlich)", &menu_partials, colors[4]),
+	MDEF_HANDLER("Dump Amiibo Keys", dump_amiibo_keys, colors[3]),
+	MDEF_MENU("Dump Mariko Partials (requires reboot)", &menu_partials, colors[4]),
 	MDEF_CAPTION("---------------", colors[5]),
 	MDEF_HANDLER("Payloads...", launch_tools, colors[0]),
-	MDEF_HANDLER("Neustart in hekate", launch_hekate, colors[1]),
+	MDEF_HANDLER("Reboot to hekate", launch_hekate, colors[1]),
 	MDEF_CAPTION("---------------", colors[2]),
-	MDEF_HANDLER_EX("Konsole neu starten (OFW)", &STATE_REBOOT_BYPASS_FUSES, power_set_state_ex, colors[3]),
-	MDEF_HANDLER_EX("Konsole neu starten (RCM)", &STATE_REBOOT_RCM, power_set_state_ex, colors[4]),
-	MDEF_HANDLER_EX("Konsole ausschalten", &STATE_POWER_OFF, power_set_state_ex, colors[5]),
+	MDEF_HANDLER_EX("Reboot (OFW)", &STATE_REBOOT_BYPASS_FUSES, power_set_state_ex, colors[3]),
+	MDEF_HANDLER_EX("Reboot (RCM)", &STATE_REBOOT_RCM, power_set_state_ex, colors[4]),
+	MDEF_HANDLER_EX("Power off", &STATE_POWER_OFF, power_set_state_ex, colors[5]),
 	MDEF_END()
 };
 
@@ -379,7 +379,7 @@ void dump_mariko_partial_keys()
 			grey_out_menu_item(&ment_partials[18]);
 		}
 
-		gfx_printf("\n%kButton druecken um zum Menue zurueckzukehren.", COLOR_ORANGE);
+		gfx_printf("\n%kPress a button to return to the menu.", COLOR_ORANGE);
 		btn_wait();
 	}
 }
@@ -398,7 +398,7 @@ void ipl_main()
 	heap_init(IPL_HEAP_START);
 
 #ifdef DEBUG_UART_PORT
-	uart_send(DEBUG_UART_PORT, (u8 *)"hekate: Hallo!\r\n", 16);
+	uart_send(DEBUG_UART_PORT, (u8 *)"hekate: Hello!\r\n", 16);
 	uart_wait_idle(DEBUG_UART_PORT, UART_TX_IDLE);
 #endif
 
