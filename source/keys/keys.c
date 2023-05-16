@@ -112,7 +112,7 @@ static void _derive_master_keys_from_latest_key(key_storage_t *keys, bool is_dev
     load_aes_key(KS_AES_ECB, keys->temp_key, keys->master_key[0], is_dev ? master_key_vectors_dev[0] : master_key_vectors[0]);
 
     if (key_exists(keys->temp_key)) {
-        EPRINTFARGS("Master keys konnten nicht ermittelt werden fuer %s.", is_dev ? "dev" : "prod");
+        EPRINTFARGS("Unable to derive master keys for %s.", is_dev ? "dev" : "prod");
         memset(keys->master_key, 0, sizeof(keys->master_key));
     }
 }
@@ -134,7 +134,7 @@ static void _derive_keyblob_keys(key_storage_t *keys) {
     if (!emmc_storage.initialized) {
         have_keyblobs = false;
     } else if (!emummc_storage_read(KEYBLOB_OFFSET / NX_EMMC_BLOCKSIZE, KB_FIRMWARE_VERSION_600 + 1, keyblob_buffer)) {
-        EPRINTF("Konnte keyblobs nicht lesen.");
+        EPRINTF("Unable to read keyblobs.");
         have_keyblobs = false;
     } else {
         have_keyblobs = true;
@@ -159,7 +159,7 @@ static void _derive_keyblob_keys(key_storage_t *keys) {
         se_aes_key_set(KS_AES_CMAC, keys->keyblob_mac_key[i], sizeof(keys->keyblob_mac_key[i]));
         se_aes_cmac(KS_AES_CMAC, keyblob_mac, sizeof(keyblob_mac), current_keyblob->iv, sizeof(current_keyblob->iv) + sizeof(keyblob_t));
         if (memcmp(current_keyblob->cmac, keyblob_mac, sizeof(keyblob_mac)) != 0) {
-            EPRINTFARGS("Keyblob %x korrupt.", i);
+            EPRINTFARGS("Keyblob %x corrupt.", i);
             continue;
         }
 
@@ -184,7 +184,7 @@ static void _derive_master_keys(key_storage_t *prod_keys, key_storage_t *dev_key
         _derive_master_keys_from_latest_key(keys, is_dev);
     } else {
         if (run_ams_keygen()) {
-            EPRINTF("Keygen konnte nicht ausgefuehrt werden.");
+            EPRINTF("Failed to run keygen.");
             return;
         }
 
@@ -260,13 +260,13 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
 
     if (is_personalized) {
         titlekey_save_path[25] = '2';
-        gfx_printf("\n%kPersonalisiert... ", colors[color_idx % 6]);
+        gfx_printf("\n%kPersonalized... ", colors[color_idx % 6]);
     } else {
-        gfx_printf("\n%kStandard...       ", colors[color_idx % 6]);
+        gfx_printf("\n%kCommon...       ", colors[color_idx % 6]);
     }
 
     if (f_open(&fp, titlekey_save_path, FA_READ | FA_OPEN_EXISTING)) {
-        EPRINTF("e1-Speicher kann nicht geoeffnet werden. Ueberspringe.");
+        EPRINTF("Unable to open e1 save. Skipping.");
         return false;
     }
 
@@ -274,10 +274,10 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
     save_init(save_ctx, &fp, save_mac_key, 0);
 
     bool save_process_success = save_process(save_ctx);
-    TPRINTF("\n  Speichere Fortschritt...");
+    TPRINTF("\n  Save process...");
 
     if (!save_process_success) {
-        EPRINTF("Fortschritt konnte nicht gespeichert werden.");
+        EPRINTF("Failed to process es save.");
         f_close(&fp);
         save_free_contexts(save_ctx);
         free(save_ctx);
@@ -285,7 +285,7 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
     }
 
     if (!save_open_file(save_ctx, &ticket_file, ticket_list_bin_path, OPEN_MODE_READ)) {
-        EPRINTF("ticket_list.bin kann im Speicher nicht gefunden werden.");
+        EPRINTF("Unable to locate ticket_list.bin in save.");
         f_close(&fp);
         save_free_contexts(save_ctx);
         free(save_ctx);
@@ -304,10 +304,10 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
         }
         offset += br;
     }
-    TPRINTF("  Zaehle titlekeys...");
+    TPRINTF("  Count titlekeys...");
 
     if (!save_open_file(save_ctx, &ticket_file, ticket_bin_path, OPEN_MODE_READ)) {
-        EPRINTF("ticket.bin kann im Speicher nicht gefunden werden.");
+        EPRINTF("Unable to locate ticket.bin in save.");
         f_close(&fp);
         save_free_contexts(save_ctx);
         free(save_ctx);
@@ -334,9 +334,9 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
     gfx_con_setpos(0, save_y);
 
     if (is_personalized) {
-        TPRINTFARGS("\n%kPersonalisiert... ", colors[(color_idx++) % 6]);
+        TPRINTFARGS("\n%kPersonalized... ", colors[(color_idx++) % 6]);
     } else {
-        TPRINTFARGS("\n%kStandard...       ", colors[(color_idx++) % 6]);
+        TPRINTFARGS("\n%kCommon...       ", colors[(color_idx++) % 6]);
     }
 
     gfx_printf("\n\n\n");
