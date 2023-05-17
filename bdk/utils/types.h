@@ -54,7 +54,7 @@ typedef u32 uptr;
 /* Colors */
 #define COLOR_RED    0xFFE70000
 #define COLOR_ORANGE 0xFFFF8C00
-#define COLOR_YELLOW 0xFFFFFF40
+#define COLOR_YELLOW 0xFFFDE100
 #define COLOR_GREEN  0xFF40FF00
 #define COLOR_BLUE   0xFF00DDFF
 #define COLOR_VIOLET 0xFF8040FF
@@ -160,7 +160,7 @@ typedef struct __attribute__((__packed__)) _boot_cfg_t
 	};
 } boot_cfg_t;
 
-static_assert(sizeof(boot_cfg_t) == 0x84, "Boot cfg storage size is wrong!");
+static_assert(sizeof(boot_cfg_t) == 0x84, "Boot cfg Speichergroesse ist falsch!");
 
 typedef struct __attribute__((__packed__)) _ipl_ver_meta_t
 {
