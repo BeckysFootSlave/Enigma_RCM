@@ -14,7 +14,7 @@ include ./Versions.inc
 
 ################################################################################
 
-TARGET := Picklock_RCM
+TARGET := Enigma_RCM
 BUILDDIR := build
 OUTPUTDIR := output
 SOURCEDIR := source
