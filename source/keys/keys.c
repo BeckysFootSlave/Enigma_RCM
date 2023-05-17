@@ -455,13 +455,13 @@ static void _derive_emmc_keys(key_storage_t *keys, titlekey_buffer_t *titlekey_b
     }
 
     if (!sd_mount()) {
-        EPRINTF("Unable to mount SD.");
+        EPRINTF("Einbinden der SD-Karte fehlgeschlagen.");
     } else if (!_derive_sd_seed(keys)) {
-        EPRINTF("Unable to get SD seed.");
+        EPRINTF("SD Seed konnte nicht abgerufen werden.");
     }
 
     if (!_derive_titlekeys(keys, titlekey_buffer, is_dev)) {
-        EPRINTF("Unable to derive titlekeys.");
+        EPRINTF("Titlekeys konnten nicht abgeleitet werden.");
     }
 
     f_mount(NULL, "bis:", 1);
@@ -497,7 +497,7 @@ int save_mariko_partial_keys(u32 start, u32 count, bool append) {
         if (ks < ARRAY_SIZE(mariko_key_vectors)) {
             se_aes_crypt_block_ecb(ks, DECRYPT, &data[0], mariko_key_vectors[ks]);
             if (key_exists(data)) {
-                EPRINTFARGS("Failed to validate keyslot %d.", ks);
+                EPRINTFARGS("Validierung des Keyslots fehlgeschlagen %d.", ks);
                 continue;
             }
         }
@@ -515,7 +515,7 @@ int save_mariko_partial_keys(u32 start, u32 count, bool append) {
 
         // Skip saving key if two results are the same indicating unsuccessful overwrite or empty slot
         if (memcmp(&data[0], &data[SE_KEY_128_SIZE], SE_KEY_128_SIZE) == 0) {
-            EPRINTFARGS("Failed to overwrite keyslot %d.", ks);
+            EPRINTFARGS("Ueberschreiben des Keyslots fehlgeschlagen %d.", ks);
             continue;
         }
 
@@ -530,7 +530,7 @@ int save_mariko_partial_keys(u32 start, u32 count, bool append) {
     free(data);
 
     if (strlen(text_buffer) == 0) {
-        EPRINTFARGS("Failed to dump partial keys %d-%d.", start, start + count - 1);
+        EPRINTFARGS("Partial keys konnten nicht gedumpt werden %d-%d.", start, start + count - 1);
         free(text_buffer);
         return 2;
     }
@@ -545,13 +545,13 @@ int save_mariko_partial_keys(u32 start, u32 count, bool append) {
     }
 
     if (!sd_mount()) {
-        EPRINTF("Unable to mount SD.");
+        EPRINTF("Einbinden der SD-Karte fehlgeschlagen.");
         free(text_buffer);
         return 3;
     }
 
     if (f_open(&fp, keyfile_path, mode)) {
-        EPRINTF("Unable to write partial keys to SD.");
+        EPRINTF("Partial keys konnten nicht auf SD geschrieben werden.");
         free(text_buffer);
         return 3;
     }
@@ -559,7 +559,7 @@ int save_mariko_partial_keys(u32 start, u32 count, bool append) {
     f_write(&fp, text_buffer, strlen(text_buffer), NULL);
     f_close(&fp);
 
-    gfx_printf("%kWrote partials to %s\n", colors[(color_idx++) % 6], keyfile_path);
+    gfx_printf("%kPartials geschrieben in %s\n", colors[(color_idx++) % 6], keyfile_path);
 
     free(text_buffer);
 
@@ -568,7 +568,7 @@ int save_mariko_partial_keys(u32 start, u32 count, bool append) {
 
 static void _save_keys_to_sd(key_storage_t *keys, titlekey_buffer_t *titlekey_buffer, bool is_dev) {
     if (!sd_mount()) {
-        EPRINTF("Unable to mount SD.");
+        EPRINTF("Einbinden der SD-Karte fehlgeschlagen.");
         return;
     }
 
@@ -647,8 +647,8 @@ static void _save_keys_to_sd(key_storage_t *keys, titlekey_buffer_t *titlekey_bu
     s_printf(root_key_name + 14, "%02x", TSEC_ROOT_KEY_VERSION);
     _save_key(root_key_name, keys->tsec_root_key, SE_KEY_128_SIZE, text_buffer);
 
-    gfx_printf("\n%k  Found %d %s keys.\n\n", colors[(color_idx++) % 6], _key_count, is_dev ? "dev" : "prod");
-    gfx_printf("%kFound through master_key_%02x.\n\n", colors[(color_idx++) % 6], KB_FIRMWARE_VERSION_MAX);
+    gfx_printf("\n%k  Es wurden %d %s Keys gefunden.\n\n", colors[(color_idx++) % 6], _key_count, is_dev ? "dev" : "prod");
+    gfx_printf("%kGefunden ueber master_key_%02x.\n\n", colors[(color_idx++) % 6], KB_FIRMWARE_VERSION_MAX);
 
     f_mkdir("sd:/switch");
 
@@ -656,9 +656,9 @@ static void _save_keys_to_sd(key_storage_t *keys, titlekey_buffer_t *titlekey_bu
 
     FILINFO fno;
     if (!sd_save_to_file(text_buffer, strlen(text_buffer), keyfile_path) && !f_stat(keyfile_path, &fno)) {
-        gfx_printf("%kWrote %d bytes to %s\n", colors[(color_idx++) % 6], (u32)fno.fsize, keyfile_path);
+        gfx_printf("%kEs wurden %d Bytes in %s geschrieben\n", colors[(color_idx++) % 6], (u32)fno.fsize, keyfile_path);
     } else {
-        EPRINTF("Unable to save keys to SD.");
+        EPRINTF("Keys konnten nicht auf SD-Karte gespeichert werden.");
     }
 
     if (_titlekey_count == 0 || !titlekey_buffer) {
@@ -680,9 +680,9 @@ static void _save_keys_to_sd(key_storage_t *keys, titlekey_buffer_t *titlekey_bu
 
     keyfile_path = "sd:/switch/title.keys";
     if (!sd_save_to_file(text_buffer, strlen(text_buffer), keyfile_path) && !f_stat(keyfile_path, &fno)) {
-        gfx_printf("%kWrote %d bytes to %s\n", colors[(color_idx++) % 6], (u32)fno.fsize, keyfile_path);
+        gfx_printf("%kEs wurden %d Bytes in %s geschrieben\n", colors[(color_idx++) % 6], (u32)fno.fsize, keyfile_path);
     } else {
-        EPRINTF("Unable to save titlekeys to SD.");
+        EPRINTF("Titlekeys konnten nicht auf SD geschrieben werden.");
     }
 
     free(text_buffer);
@@ -692,22 +692,22 @@ static void _derive_keys() {
     minerva_periodic_training();
 
     if (!check_keyslot_access()) {
-        EPRINTF("Unable to set crypto keyslots!\nTry launching payload differently\n or flash Spacecraft-NX if using a modchip.");
+        EPRINTF("Die Krypto Keyslots konnten nicht gesetzt werden!\nVersuche, die payload anders zu starten\noder flashe Modchip-FW, wenn ein Modchip verwendet wird.");
         return;
     }
 
     u32 start_whole_operation_time = get_tmr_us();
 
     if (emummc_storage_init_mmc()) {
-        EPRINTF("Unable to init MMC.");
+        EPRINTF("MMC konnte nicht initialisiert werden.");
     } else {
-        TPRINTFARGS("%kMMC init...     ", colors[(color_idx++) % 6]);
+        TPRINTFARGS("%kMMC initialisierung...     ", colors[(color_idx++) % 6]);
     }
 
     minerva_periodic_training();
 
     if (emmc_storage.initialized && !emummc_storage_set_mmc_partition(EMMC_BOOT0)) {
-        EPRINTF("Unable to set partition.");
+        EPRINTF("Partition konnte nicht gesetzt werden.");
         emummc_storage_end();
     }
 
@@ -718,11 +718,11 @@ static void _derive_keys() {
 
     _derive_master_keys(&prod_keys, &dev_keys, is_dev);
 
-    TPRINTFARGS("%kMaster keys...  ", colors[(color_idx++) % 6]);
+    TPRINTFARGS("%kMaster Keys...  ", colors[(color_idx++) % 6]);
 
     _derive_bis_keys(keys);
 
-    TPRINTFARGS("%kBIS keys...     ", colors[(color_idx++) % 6]);
+    TPRINTFARGS("%kBIS Keys...     ", colors[(color_idx++) % 6]);
 
     _derive_misc_keys(keys);
     _derive_non_unique_keys(&prod_keys, is_dev);
@@ -732,11 +732,11 @@ static void _derive_keys() {
 
     // Requires BIS key for SYSTEM partition
     if (!emmc_storage.initialized) {
-        EPRINTF("eMMC nicht initialisiert.\nSkipping SD seed and titlekeys.");
+        EPRINTF("eMMC nicht initialisiert.\nUeberspringe SD Seed und Titlekeys.");
     } else if (key_exists(keys->bis_key[2])) {
         _derive_emmc_keys(keys, titlekey_buffer, is_dev);
     } else {
-        EPRINTF("Benoetigte BIS keys fehlen.\nSkipping SD seed and titlekeys.");
+        EPRINTF("Benoetigte BIS keys fehlen.\nUeberspringe SD Seed und Titlekeys.");
     }
 
     end_time = get_tmr_us();
@@ -774,7 +774,7 @@ void derive_amiibo_keys() {
     minerva_periodic_training();
 
     if (!key_exists(keys->master_key[0])) {
-        EPRINTF("Unable to derive master keys for NFC.");
+        EPRINTF("Master Keys fuer NFC konnten nicht abgeleitet werden.");
         minerva_change_freq(FREQ_800);
         btn_wait();
         return;
@@ -790,18 +790,18 @@ void derive_amiibo_keys() {
     se_calc_sha256_oneshot(hash, &nfc_save_keys[0], sizeof(nfc_save_keys));
 
     if (memcmp(hash, is_dev ? nfc_blob_hash_dev : nfc_blob_hash, sizeof(hash)) != 0) {
-        EPRINTF("Amiibo hash mismatch. Skipping save.");
+        EPRINTF("Amiibo-Hash stimmt nicht ueberein. Ueberspringe Speicherung.");
     } else {
         const char *keyfile_path = is_dev ? "sd:/switch/key_dev.bin" : "sd:/switch/key_retail.bin";
 
         if (!sd_save_to_file(&nfc_save_keys[0], sizeof(nfc_save_keys), keyfile_path)) {
-            gfx_printf("%kWrote Amiibo keys to\n %s\n", colors[(color_idx++) % 6], keyfile_path);
+            gfx_printf("%kAmiibo keys wurden geschrieben in\n %s\n", colors[(color_idx++) % 6], keyfile_path);
         } else {
-            EPRINTF("Unable to save Amiibo keys to SD.");
+            EPRINTF("Amiibo keys konnten nicht auf SD geschrieben werden.");
         }
     }
 
-    gfx_printf("\n%kPress a button to return to the menu.", colors[(color_idx++) % 6]);
+    gfx_printf("\n%kDruecke eine Taste um zum Menue zurueckzukehren.", colors[(color_idx++) % 6]);
     minerva_change_freq(FREQ_800);
     btn_wait();
     gfx_clear_grey(0x1B);
@@ -814,7 +814,7 @@ void dump_keys() {
     gfx_clear_grey(0x1B);
     gfx_con_setpos(0, 0);
 
-    gfx_printf("[%kLo%kck%kpi%kck%k_R%kCM%k v%d.%d.%d%k]\n\n",
+    gfx_printf("[%kE%kni%kg%kma%k_R%kCM%k v%d.%d.%d%k]\n\n",
         colors[0], colors[1], colors[2], colors[3], colors[4], colors[5], 0xFFFF00FF, LP_VER_MJ, LP_VER_MN, LP_VER_BF, 0xFFCCCCCC);
 
     _key_count = 0;
@@ -834,16 +834,16 @@ void dump_keys() {
     }
 
     minerva_change_freq(FREQ_800);
-    gfx_printf("\n%kPress VOL+ to save a screenshot\n or another button to return to the menu.\n\n", colors[(color_idx++) % 6]);
+    gfx_printf("\n%kDruecke VOL+ um Screenshot zu erstellen\n oder andere Taste um zum Menue zurueckzukehren.\n\n", colors[(color_idx++) % 6]);
     u8 btn = btn_wait();
     if (btn == BTN_VOL_UP) {
         int res = save_fb_to_bmp();
         if (!res) {
-            gfx_printf("%kScreenshot sd:/switch/enigma_rcm.bmp saved.", colors[(color_idx++) % 6]);
+            gfx_printf("%kScreenshot sd:/switch/enigma_rcm.bmp gespeichert.", colors[(color_idx++) % 6]);
         } else {
-            EPRINTF("Screenshot failed.");
+            EPRINTF("Screenshot fehlgeschlagen.");
         }
-        gfx_printf("\n%kPress a button to return to the menu.", colors[(color_idx++) % 6]);
+        gfx_printf("\n%kDruecke eine Taste um zum Menue zurueckzukehren.", colors[(color_idx++) % 6]);
         btn_wait();
     }
     gfx_clear_grey(0x1B);
