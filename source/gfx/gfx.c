@@ -473,7 +473,7 @@ void gfx_hexdiff(u32 base, const void *buf1, const void *buf2, u32 len)
 
 	if (memcmp(buff1, buff2, len) == 0)
 	{
-		gfx_printf("Diff: No differences found.\n");
+		gfx_printf("Diff: Keinen Unterschied gefunden.\n");
 		return;
 	}
 

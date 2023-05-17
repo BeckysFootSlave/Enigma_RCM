@@ -112,7 +112,7 @@ static void _derive_master_keys_from_latest_key(key_storage_t *keys, bool is_dev
     load_aes_key(KS_AES_ECB, keys->temp_key, keys->master_key[0], is_dev ? master_key_vectors_dev[0] : master_key_vectors[0]);
 
     if (key_exists(keys->temp_key)) {
-        EPRINTFARGS("Unable to derive master keys for %s.", is_dev ? "dev" : "prod");
+        EPRINTFARGS("Master keys konnten nicht ermittelt werden fuer %s.", is_dev ? "dev" : "prod");
         memset(keys->master_key, 0, sizeof(keys->master_key));
     }
 }
@@ -134,7 +134,7 @@ static void _derive_keyblob_keys(key_storage_t *keys) {
     if (!emmc_storage.initialized) {
         have_keyblobs = false;
     } else if (!emummc_storage_read(KEYBLOB_OFFSET / NX_EMMC_BLOCKSIZE, KB_FIRMWARE_VERSION_600 + 1, keyblob_buffer)) {
-        EPRINTF("Unable to read keyblobs.");
+        EPRINTF("Konnte keyblobs nicht lesen.");
         have_keyblobs = false;
     } else {
         have_keyblobs = true;
@@ -159,7 +159,7 @@ static void _derive_keyblob_keys(key_storage_t *keys) {
         se_aes_key_set(KS_AES_CMAC, keys->keyblob_mac_key[i], sizeof(keys->keyblob_mac_key[i]));
         se_aes_cmac(KS_AES_CMAC, keyblob_mac, sizeof(keyblob_mac), current_keyblob->iv, sizeof(current_keyblob->iv) + sizeof(keyblob_t));
         if (memcmp(current_keyblob->cmac, keyblob_mac, sizeof(keyblob_mac)) != 0) {
-            EPRINTFARGS("Keyblob %x corrupt.", i);
+            EPRINTFARGS("Keyblob %x korrupt.", i);
             continue;
         }
 
@@ -184,7 +184,7 @@ static void _derive_master_keys(key_storage_t *prod_keys, key_storage_t *dev_key
         _derive_master_keys_from_latest_key(keys, is_dev);
     } else {
         if (run_ams_keygen()) {
-            EPRINTF("Failed to run keygen.");
+            EPRINTF("Keygen konnte nicht ausgefuehrt werden.");
             return;
         }
 
@@ -260,13 +260,13 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
 
     if (is_personalized) {
         titlekey_save_path[25] = '2';
-        gfx_printf("\n%kPersonalized... ", colors[color_idx % 6]);
+        gfx_printf("\n%kPersonalisiert... ", colors[color_idx % 6]);
     } else {
-        gfx_printf("\n%kCommon...       ", colors[color_idx % 6]);
+        gfx_printf("\n%kStandard...       ", colors[color_idx % 6]);
     }
 
     if (f_open(&fp, titlekey_save_path, FA_READ | FA_OPEN_EXISTING)) {
-        EPRINTF("Unable to open e1 save. Skipping.");
+        EPRINTF("e1-Speicher kann nicht geoeffnet werden. Ueberspringe.");
         return false;
     }
 
@@ -274,10 +274,10 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
     save_init(save_ctx, &fp, save_mac_key, 0);
 
     bool save_process_success = save_process(save_ctx);
-    TPRINTF("\n  Save process...");
+    TPRINTF("\n  Speichere Fortschritt...");
 
     if (!save_process_success) {
-        EPRINTF("Failed to process es save.");
+        EPRINTF("Fortschritt konnte nicht gespeichert werden.");
         f_close(&fp);
         save_free_contexts(save_ctx);
         free(save_ctx);
@@ -285,7 +285,7 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
     }
 
     if (!save_open_file(save_ctx, &ticket_file, ticket_list_bin_path, OPEN_MODE_READ)) {
-        EPRINTF("Unable to locate ticket_list.bin in save.");
+        EPRINTF("ticket_list.bin kann im Speicher nicht gefunden werden.");
         f_close(&fp);
         save_free_contexts(save_ctx);
         free(save_ctx);
@@ -304,10 +304,10 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
         }
         offset += br;
     }
-    TPRINTF("  Count titlekeys...");
+    TPRINTF("  Zaehle titlekeys...");
 
     if (!save_open_file(save_ctx, &ticket_file, ticket_bin_path, OPEN_MODE_READ)) {
-        EPRINTF("Unable to locate ticket.bin in save.");
+        EPRINTF("ticket.bin kann im Speicher nicht gefunden werden.");
         f_close(&fp);
         save_free_contexts(save_ctx);
         free(save_ctx);
@@ -334,9 +334,9 @@ static bool _get_titlekeys_from_save(u32 buf_size, const u8 *save_mac_key, title
     gfx_con_setpos(0, save_y);
 
     if (is_personalized) {
-        TPRINTFARGS("\n%kPersonalized... ", colors[(color_idx++) % 6]);
+        TPRINTFARGS("\n%kPersonalisiert... ", colors[(color_idx++) % 6]);
     } else {
-        TPRINTFARGS("\n%kCommon...       ", colors[(color_idx++) % 6]);
+        TPRINTFARGS("\n%kStandard...       ", colors[(color_idx++) % 6]);
     }
 
     gfx_printf("\n\n\n");
@@ -359,12 +359,12 @@ static bool _derive_sd_seed(key_storage_t *keys) {
     FRESULT fr = f_open(&fp, private_path, FA_READ | FA_OPEN_EXISTING);
     free(private_path);
     if (fr) {
-        EPRINTF("Unable to open SD seed vector. Skipping.");
+        EPRINTF("Kann die SD Seed-Vektor-Datei nicht oeffnen. Ueberspringe.");
         return false;
     }
     // Get sd seed verification vector
     if (f_read(&fp, keys->temp_key, SE_KEY_128_SIZE, &read_bytes) || read_bytes != SE_KEY_128_SIZE) {
-        EPRINTF("Unable to read SD seed vector. Skipping.");
+        EPRINTF("Kann die SD Seed-Vektor-Datei nicht lesen. Ueberspringe.");
         f_close(&fp);
         return false;
     }
@@ -372,7 +372,7 @@ static bool _derive_sd_seed(key_storage_t *keys) {
 
     // This file is small enough that parsing the savedata properly is slower
     if (f_open(&fp, "bis:/save/8000000000000043", FA_READ | FA_OPEN_EXISTING)) {
-        EPRINTF("Unable to open ns_appman save.\nSkipping SD seed.");
+        EPRINTF("ns_appman Sicherung kann nicht gelesen werden.\nUeberspringe SD Seed.");
         return false;
     }
 
@@ -405,7 +405,7 @@ static bool _derive_titlekeys(key_storage_t *keys, titlekey_buffer_t *titlekey_b
     _get_titlekeys_from_save(buf_size, keys->save_mac_key, titlekey_buffer, NULL);
     _get_titlekeys_from_save(buf_size, keys->save_mac_key, titlekey_buffer, &keys->eticket_rsa_keypair);
 
-    gfx_printf("\n%k  Found %d titlekeys.\n\n", colors[(color_idx++) % 6], _titlekey_count);
+    gfx_printf("\n%k Es wurden %d Titlekeys gefunden.\n\n", colors[(color_idx++) % 6], _titlekey_count);
 
     return true;
 }
@@ -423,16 +423,16 @@ static void _derive_emmc_keys(key_storage_t *keys, titlekey_buffer_t *titlekey_b
     se_aes_key_set(KS_BIS_02_TWEAK, keys->bis_key[2] + 0x10, SE_KEY_128_SIZE);
 
     if (!emummc_storage_set_mmc_partition(EMMC_GPP)) {
-        EPRINTF("Unable to set partition.");
+        EPRINTF("Partition kann nicht gesetzt werden.");
         return;
     }
 
     if (!decrypt_ssl_rsa_key(keys, titlekey_buffer)) {
-        EPRINTF("Unable to derive SSL key.");
+        EPRINTF("SSL-Schluessel kann nicht abgeleitet werden.");
     }
 
     if (!decrypt_eticket_rsa_key(keys, titlekey_buffer, is_dev)) {
-        EPRINTF("Unable to derive ETicket key.");
+        EPRINTF("ETicket-Key kann nicht abgeleitet werden.");
     }
 
     // Parse eMMC GPT
@@ -441,7 +441,7 @@ static void _derive_emmc_keys(key_storage_t *keys, titlekey_buffer_t *titlekey_b
 
     emmc_part_t *system_part = nx_emmc_part_find(&gpt, "SYSTEM");
     if (!system_part) {
-        EPRINTF("Unable to locate System partition.");
+        EPRINTF("System-Partition konnte nicht lokalisiert werden.");
         nx_emmc_gpt_free(&gpt);
         return;
     }
@@ -449,7 +449,7 @@ static void _derive_emmc_keys(key_storage_t *keys, titlekey_buffer_t *titlekey_b
     nx_emmc_bis_init(system_part);
 
     if (f_mount(&emmc_fs, "bis:", 1)) {
-        EPRINTF("Unable to mount system partition.");
+        EPRINTF("System-Partition konnte nicht eingebunden werden.");
         nx_emmc_gpt_free(&gpt);
         return;
     }
@@ -732,15 +732,15 @@ static void _derive_keys() {
 
     // Requires BIS key for SYSTEM partition
     if (!emmc_storage.initialized) {
-        EPRINTF("eMMC not initialized.\nSkipping SD seed and titlekeys.");
+        EPRINTF("eMMC nicht initialisiert.\nSkipping SD seed and titlekeys.");
     } else if (key_exists(keys->bis_key[2])) {
         _derive_emmc_keys(keys, titlekey_buffer, is_dev);
     } else {
-        EPRINTF("Missing needed BIS keys.\nSkipping SD seed and titlekeys.");
+        EPRINTF("Benoetigte BIS keys fehlen.\nSkipping SD seed and titlekeys.");
     }
 
     end_time = get_tmr_us();
-    gfx_printf("%Picklock totally done in %d us\n", colors[(color_idx++) % 6], end_time - start_whole_operation_time);
+    gfx_printf("%kEnigma(tisiert) in %d ms\n", colors[(color_idx++) % 6], end_time - start_whole_operation_time);
 
     if (h_cfg.t210b01) {
         // On Mariko, save only relevant key set
@@ -839,7 +839,7 @@ void dump_keys() {
     if (btn == BTN_VOL_UP) {
         int res = save_fb_to_bmp();
         if (!res) {
-            gfx_printf("%kScreenshot sd:/switch/picklock_rcm.bmp saved.", colors[(color_idx++) % 6]);
+            gfx_printf("%kScreenshot sd:/switch/enigma_rcm.bmp saved.", colors[(color_idx++) % 6]);
         } else {
             EPRINTF("Screenshot failed.");
         }

@@ -32,14 +32,14 @@ bool cal0_read(u32 tweak_ks, u32 crypt_ks, void *read_buffer) {
     }
 
     if (!emummc_storage_read(NX_EMMC_CALIBRATION_OFFSET / NX_EMMC_BLOCKSIZE, NX_EMMC_CALIBRATION_SIZE / NX_EMMC_BLOCKSIZE, read_buffer)) {
-        EPRINTF("Unable to read PRODINFO.");
+        EPRINTF("PRODINFO konnte nicht gelesen werden.");
         return false;
     }
 
     se_aes_xts_crypt(tweak_ks, crypt_ks, DECRYPT, 0, read_buffer, read_buffer, XTS_CLUSTER_SIZE, NX_EMMC_CALIBRATION_SIZE / XTS_CLUSTER_SIZE);
 
     if (cal0->magic != MAGIC_CAL0) {
-        EPRINTF("Invalid CAL0 magic. Check BIS key 0.");
+        EPRINTF("Ungueltige CAL0 Magie. Ueberpruefe BIS Key 0.");
         return false;
     }
 
@@ -64,7 +64,7 @@ bool cal0_get_ssl_rsa_key(const nx_emmc_cal0_t *cal0, const void **out_key, u32 
         *out_iv = cal0->ssl_key_iv;
         *out_generation = 0;
     } else {
-        EPRINTF("Crc16 error reading device key.");
+        EPRINTF("Crc16 Fehler beim lesen der Geraete-Keys.");
         return false;
     }
     return true;
@@ -89,7 +89,7 @@ bool cal0_get_eticket_rsa_key(const nx_emmc_cal0_t *cal0, const void **out_key, 
         *out_iv = cal0->rsa2048_eticket_key_iv;
         *out_generation = 0;
     } else {
-        EPRINTF("Crc16 error reading device key.");
+        EPRINTF("Crc16 Fehler beim lesen der Geraete-Keys.");
         return false;
     }
     return true;
