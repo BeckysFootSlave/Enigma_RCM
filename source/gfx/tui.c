@@ -154,7 +154,7 @@ void *tui_do_menu(menu_t *menu)
 		if (h_cfg.emummc_force_disable)
 			gfx_printf("%kKeine emuMMC Konfiguration gefunden.\n", 0xFF800000);
 		gfx_con_setpos(0,  1191);
-		gfx_printf("%k VOL:   Hoch/Runter\n POWER: Auswahl bestaetigen%k", 0xFF555555, 0xFFCCCCCC);
+		gfx_printf("%k  VOL:   Hoch/Runter\n  POWER: Auswahl bestaetigen%k", 0xFFFFFFFF, 0xFFCCCCCC);
 
 		display_backlight_brightness(h_cfg.backlight, 1000);
 
